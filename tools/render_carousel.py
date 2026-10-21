@@ -1,7 +1,8 @@
 """render_carousel.py SRC_DIR OUT_DIR [BLOBDIR]
+BLOBDIR: folder with the canvas uploads saved as <asset-id>[.ext] (for /_blob/<id> images).
 SRC_DIR contains project/canvas.json + project/*.dc.html (a Design canvas).
 Renders each board in canvas order to OUT_DIR/NN.jpg (1080x1350)."""
-import sys, os, re, json, html
+import sys, os, re, json, html, glob
 from playwright.sync_api import sync_playwright
 CH = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
 FONTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fonts')
@@ -31,7 +32,12 @@ def prep(s):
     s = s.replace('<style>', '<style>' + ff, 1) if '<style>' in s else s.replace('</head>', f'<style>{ff}</style></head>')
     s = s.replace('@bytecapital<', '@byte_capital<')
     if blobdir:
-        s = re.sub(r'/_blob/([0-9a-f]{32})', lambda mm: 'file://' + os.path.join(os.path.abspath(blobdir), mm.group(1)), s)
+        def blob(mm):
+            hits = sorted(glob.glob(os.path.join(os.path.abspath(blobdir), mm.group(1) + '*')))
+            if not hits:
+                print('MISSING_BLOB', mm.group(1)); return mm.group(0)
+            return 'file://' + hits[0]
+        s = re.sub(r'/_blob/([0-9a-f]{32})', blob, s)
     return s
 with sync_playwright() as p:
     br = p.chromium.launch(executable_path=CH, args=['--no-sandbox', '--allow-file-access-from-files'])
