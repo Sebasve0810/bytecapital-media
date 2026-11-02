@@ -3,12 +3,13 @@
 Imágenes públicas de los carruseles de Byte Capital (Instagram @byte_capital) y la publicación automática con GitHub Actions.
 
 - `posts/<id-de-la-noticia>/NN.jpg`: láminas de cada carrusel, 1080×1350, en orden.
+- `posts/<id>/historia.jpg`: versión 1080×1920 de la portada para las historias (la crea `tools/render_historia.py posts/<id>`).
 - `tools/render_carousel.py`: convierte un lienzo de diseño (`project/canvas.json` + `project/*.dc.html`) en JPG.
   Uso: `python3 tools/render_carousel.py <carpeta-del-lienzo> posts/<id>`
 - `cola/<id>.json`: posts listos para publicar (los agrega el Publicador de Claude).
 - `estado/<id>.json`: resultado de cada publicación (lo escribe GitHub Actions).
 - `tools/publicar_instagram.py`: publica la cola con la API oficial de Instagram.
-- `.github/workflows/publicar-instagram.yml`: corre a las **10:00, 12:00 y 18:00** (Bogotá) y publica hasta **5 posts** por franja, en orden de llegada.
+- `.github/workflows/publicar-instagram.yml`: corre a las **10:00, 12:00 y 18:00** (Bogotá) y publica hasta **5 posts** por franja, en orden de llegada, y sube cada uno también a las **historias**.
 - `.github/workflows/renovar-token-instagram.yml`: renueva el token de Instagram los días 1 y 15 de cada mes.
 
 ## Formato de la cola
@@ -23,11 +24,12 @@ Imágenes públicas de los carruseles de Byte Capital (Instagram @byte_capital) 
   "imagenes": [
     "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-03-nvidia-resultados/01.jpg"
   ],
+  "historia": "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-03-nvidia-resultados/historia.jpg",
   "encoladoEn": "2026-11-03T08:45:00-05:00"
 }
 ```
 
-`estado/<id>.json` queda con `estado` = `publicada` (con `permalink`), `error` (se reintenta en la siguiente franja, hasta 3 intentos) o `fallida` (no se reintenta; revisar `ultimoError`).
+`estado/<id>.json` queda con `estado` = `publicada` (con `permalink`), `error` (se reintenta en la siguiente franja, hasta 3 intentos) o `fallida` (no se reintenta; revisar `ultimoError`). El campo `historia` guarda el resultado de la historia: si falla, se reintenta en las franjas siguientes (hasta 3 veces en 24 horas) sin afectar al post. Si la cola no trae `historia`, se usa la primera imagen. La API no permite stickers ni enlaces en las historias.
 
 ## Configuración (una sola vez)
 

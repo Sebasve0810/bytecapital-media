@@ -4,7 +4,7 @@ SRC_DIR contains project/canvas.json + project/*.dc.html (a Design canvas).
 Renders each board in canvas order to OUT_DIR/NN.jpg (1080x1350)."""
 import sys, os, re, json, html, glob
 from playwright.sync_api import sync_playwright
-CH = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
+CH = (sorted(glob.glob('/opt/pw-browsers/chromium-*/chrome-linux*/chrome')) or ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome'])[-1]
 FONTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fonts')
 src, out = sys.argv[1], sys.argv[2]
 blobdir = sys.argv[3] if len(sys.argv) > 3 else None

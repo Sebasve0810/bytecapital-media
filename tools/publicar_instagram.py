@@ -3,10 +3,14 @@
 Lo corre el workflow .github/workflows/publicar-instagram.yml en las franjas del día.
 
 Cola (la escribe el Publicador de Claude, este script nunca la modifica):
-  cola/<id>.json  {"id", "titulo", "texto", "imagenes": [urls raw de GitHub], "encoladoEn"}
+  cola/<id>.json  {"id", "titulo", "texto", "imagenes": [urls raw de GitHub], "historia": url 1080x1920, "encoladoEn"}
+  Cada post publicado sube también una historia con `historia` (si falta, con la primera imagen).
 Estado (lo escribe este script):
-  estado/<id>.json  {"id", "estado", "intentos", "publicadaEn", "mediaId", "permalink", "ultimoError", ...}
+  estado/<id>.json  {"id", "estado", "intentos", "publicadaEn", "mediaId", "permalink", "ultimoError",
+                     "historia": {"estado", "intentos", "mediaId", "ultimoError"}, ...}
   estado = publicada | error (se reintenta en la siguiente franja) | fallida (no se reintenta)
+  Una historia que falla se reintenta en las franjas siguientes (hasta 3 intentos, máximo 24 horas);
+  nunca cambia el estado del post.
 
 Variables de entorno:
   IG_ACCESS_TOKEN   token de usuario de Instagram (obligatorio)
@@ -137,6 +141,47 @@ def pendientes():
     return lista
 
 
+def historias_pendientes():
+    """Posts ya publicados cuya historia falló y aún tiene intentos (solo de las últimas 24 horas)."""
+    lista = []
+    if not os.path.isdir(DIR_ESTADO):
+        return lista
+    limite = ahora() - timedelta(hours=24)
+    for nombre in sorted(os.listdir(DIR_ESTADO)):
+        if not nombre.endswith(".json"):
+            continue
+        est = leer_json(os.path.join(DIR_ESTADO, nombre))
+        h = est.get("historia")
+        if est.get("estado") != "publicada" or not isinstance(h, dict) or h.get("estado") != "error":
+            continue
+        if h.get("intentos", 0) >= MAX_INTENTOS:
+            continue
+        try:
+            if datetime.fromisoformat(est.get("publicadaEn", "")) < limite:
+                continue
+        except ValueError:
+            continue
+        ruta_cola = os.path.join(DIR_COLA, nombre)
+        if os.path.exists(ruta_cola):
+            lista.append((leer_json(ruta_cola), est))
+    return lista
+
+
+def url_historia(post):
+    return post.get("historia") or post["imagenes"][0]
+
+
+def url_responde(url):
+    try:
+        req = urllib.request.Request(url, method="HEAD")
+        with urllib.request.urlopen(req, timeout=30) as r:
+            if r.status != 200:
+                return f"la imagen {url} responde {r.status}"
+    except Exception as e:
+        return f"la imagen {url} no responde ({e})"
+    return None
+
+
 def validar(post):
     imgs = post.get("imagenes") or []
     texto = post.get("texto") or ""
@@ -147,13 +192,9 @@ def validar(post):
     if texto.count("#") > 30:
         return "el texto tiene más de 30 hashtags"
     for url in imgs:
-        try:
-            req = urllib.request.Request(url, method="HEAD")
-            with urllib.request.urlopen(req, timeout=30) as r:
-                if r.status != 200:
-                    return f"la imagen {url} responde {r.status}"
-        except Exception as e:
-            return f"la imagen {url} no responde ({e})"
+        problema = url_responde(url)
+        if problema:
+            return problema
     return None
 
 
@@ -192,6 +233,36 @@ def publicar(uid, post):
     return media_id, permalink
 
 
+def publicar_historia(uid, post, est):
+    """Sube la historia del post. Nunca cambia el estado del post; guarda el resultado en est['historia']."""
+    h = est.get("historia") if isinstance(est.get("historia"), dict) else {}
+    h["intentos"] = h.get("intentos", 0) + 1
+    url = url_historia(post)
+    try:
+        problema = url_responde(url)
+        if problema:
+            raise ErrorGraph(problema)
+        cid = llamar("POST", f"{uid}/media", {"image_url": url, "media_type": "STORIES"})["id"]
+        esperar_contenedor(cid)
+        try:
+            h["mediaId"] = llamar("POST", f"{uid}/media_publish", {"creation_id": cid}, reintentos=0)["id"]
+        except ErrorRed as e:
+            h["intentos"] = MAX_INTENTOS  # no reintentar para no duplicar la historia
+            raise ErrorRed(f"no se sabe si se publicó ({e}); revísala en Instagram") from e
+        h.update({"estado": "publicada", "publicadaEn": iso(), "ultimoError": ""})
+        ok = True
+    except (ErrorGraph, ErrorRed) as e:
+        h.update({"estado": "error", "ultimoError": str(e)})
+        ok = False
+    est["historia"] = h
+    guardar_estado(est)
+    if ok:
+        log(f"   ↳ historia publicada")
+    else:
+        log(f"   ↳ ❌ historia de {post['id']}: {h['ultimoError']} (intento {h['intentos']})")
+    return ok
+
+
 def esperar_hasta_franja():
     t = ahora()
     for f in FRANJAS:
@@ -224,7 +295,8 @@ def main():
     log(f"Cuenta: @{me.get('username', '?')} · modo {MODO}")
 
     lista = pendientes()
-    if not lista:
+    reintentos_historia = historias_pendientes()
+    if not lista and not reintentos_historia:
         log("Sin posts en cola")
         return 0
     tanda = lista[:MAX_POR_FRANJA]
@@ -232,8 +304,9 @@ def main():
 
     if MODO == "prueba":
         for post, _ in tanda:
-            problema = validar(post)
+            problema = validar(post) or url_responde(url_historia(post))
             log(f"{'✅' if not problema else '❌'} {post['id']}: {len(post.get('imagenes', []))} imagen(es)"
+                + (" + historia" if post.get("historia") else " + historia con la portada")
                 + (f" · {problema}" if problema else ""))
         return 0
 
@@ -241,6 +314,10 @@ def main():
         esperar_hasta_franja()
 
     fallos = 0
+    for post, est in reintentos_historia:
+        log(f"Reintentando la historia de {post['id']}")
+        if not publicar_historia(uid, post, est):
+            fallos += 1
     for i, (post, est) in enumerate(tanda):
         if i > 0 and SEPARACION > 0:
             time.sleep(SEPARACION)
@@ -268,6 +345,8 @@ def main():
                     "permalink": permalink, "ultimoError": ""})
         guardar_estado(est)
         log(f"✅ {post['id']} publicado {permalink}")
+        if not publicar_historia(uid, post, est):
+            fallos += 1
     return 1 if fallos else 0
 
 
