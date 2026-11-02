@@ -1,0 +1,56 @@
+name: Publicar en Instagram
+
+# Franjas (hora de Bogotá, UTC-5): 10:00, 12:00 y 18:00.
+# El cron arranca 10 minutos antes (en UTC) y el script espera a la hora exacta,
+# porque GitHub suele retrasar unos minutos las ejecuciones programadas.
+on:
+  schedule:
+    - cron: "50 14 * * *"   # 09:50 Bogotá -> franja 10:00
+    - cron: "50 16 * * *"   # 11:50 Bogotá -> franja 12:00
+    - cron: "50 22 * * *"   # 17:50 Bogotá -> franja 18:00
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "prueba = no publica, solo revisa token e imágenes"
+        type: choice
+        options: [prueba, publicar]
+        default: prueba
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publicar-instagram
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publicar la cola (máximo 5 posts)
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          MODO: ${{ inputs.modo || 'publicar' }}
+          ESPERAR_FRANJA: ${{ github.event_name == 'schedule' && '1' || '0' }}
+          MAX_POR_FRANJA: "5"
+          SEPARACION_SEGUNDOS: "60"
+          FRANJAS: "10:00,12:00,18:00"
+        run: python3 tools/publicar_instagram.py
+
+      - name: Guardar el estado en el repositorio
+        if: always()
+        run: |
+          git config user.name "Byte Capital Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add estado 2>/dev/null || true
+          if git diff --cached --quiet; then echo "Sin cambios de estado"; exit 0; fi
+          git commit -m "Estado de publicación $(date -u '+%Y-%m-%d %H:%M') UTC"
+          for i in 1 2 3; do
+            git pull --rebase && git push && exit 0
+            sleep 5
+          done
+          exit 1
