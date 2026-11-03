@@ -13,9 +13,11 @@ Estado (lo escribe este script):
   nunca cambia el estado del post.
 
 Variables de entorno:
-  IG_ACCESS_TOKEN   token de usuario de Instagram (obligatorio)
-  IG_USER_ID        id de la cuenta (opcional; si falta se obtiene con /me)
-  IG_API_BASE       por defecto https://graph.instagram.com/v26.0
+  IG_ACCESS_TOKEN   token de acceso (obligatorio)
+  IG_USER_ID        id de la cuenta de Instagram (obligatorio con el inicio de sesión unificado;
+                    si falta se usa /me, que solo sirve con tokens de usuario de Instagram)
+  IG_API_BASE       por defecto https://graph.facebook.com/v26.0 (inicio de sesión unificado);
+                    con tokens de usuario de Instagram: https://graph.instagram.com/v26.0
   MODO              publicar (por defecto) | prueba (no publica: valida token, imágenes y muestra el plan)
   MAX_POR_FRANJA    máximo de posts por ejecución (por defecto 5)
   SEPARACION_SEGUNDOS  espera entre un post y el siguiente (por defecto 60)
@@ -36,7 +38,7 @@ BOGOTA = timezone(timedelta(hours=-5), "America/Bogota")
 RAIZ = os.environ.get("REPO_ROOT", os.getcwd())
 DIR_COLA = os.path.join(RAIZ, "cola")
 DIR_ESTADO = os.path.join(RAIZ, "estado")
-API = os.environ.get("IG_API_BASE", "https://graph.instagram.com/v26.0").rstrip("/")
+API = os.environ.get("IG_API_BASE", "https://graph.facebook.com/v26.0").rstrip("/")
 TOKEN = os.environ.get("IG_ACCESS_TOKEN", "")
 MODO = os.environ.get("MODO", "publicar").strip().lower()
 MAX_POR_FRANJA = int(os.environ.get("MAX_POR_FRANJA", "5"))
@@ -286,13 +288,20 @@ def main():
     if not TOKEN:
         log("❌ Falta el secreto IG_ACCESS_TOKEN")
         return 1
+    uid = os.environ.get("IG_USER_ID", "").strip()
     try:
-        me = llamar("GET", "me", params={"fields": "user_id,username"})
+        if uid:
+            # Inicio de sesión unificado (graph.facebook.com): el token es de usuario del sistema,
+            # así que "me" no devuelve la cuenta de Instagram; se consulta por su id.
+            me = llamar("GET", uid, params={"fields": "username"})
+        else:
+            # Inicio de sesión de Instagram (graph.instagram.com): "me" es la cuenta.
+            me = llamar("GET", "me", params={"fields": "user_id,username"})
+            uid = me.get("user_id") or me.get("id")
     except Exception as e:
-        log(f"❌ El token no funciona: {e}")
+        log(f"❌ El token o el ID de la cuenta no funcionan: {e}")
         return 1
-    uid = os.environ.get("IG_USER_ID") or me.get("user_id") or me.get("id")
-    log(f"Cuenta: @{me.get('username', '?')} · modo {MODO}")
+    log(f"Cuenta: @{me.get('username', '?')} (id {uid}) · modo {MODO}")
 
     lista = pendientes()
     reintentos_historia = historias_pendientes()

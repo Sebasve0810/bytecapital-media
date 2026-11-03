@@ -33,7 +33,8 @@ jobs:
       - name: Publicar la cola (máximo 5 posts)
         env:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
-          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID || '17841424069892350' }}
+          IG_API_BASE: https://graph.facebook.com/v26.0
           MODO: ${{ inputs.modo || 'publicar' }}
           ESPERAR_FRANJA: ${{ github.event_name == 'schedule' && '1' || '0' }}
           MAX_POR_FRANJA: "5"
