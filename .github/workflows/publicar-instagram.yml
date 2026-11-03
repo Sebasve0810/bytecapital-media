@@ -1,10 +1,11 @@
 name: Publicar en Instagram
 
-# Franjas (hora de Bogotá, UTC-5): 10:00, 12:00 y 18:00.
+# Franjas (hora de Bogotá, UTC-5): 07:00, 10:00, 12:00 y 18:00.
 # El cron arranca 10 minutos antes (en UTC) y el script espera a la hora exacta,
 # porque GitHub suele retrasar unos minutos las ejecuciones programadas.
 on:
   schedule:
+    - cron: "50 11 * * *"   # 06:50 Bogotá -> franja 07:00
     - cron: "50 14 * * *"   # 09:50 Bogotá -> franja 10:00
     - cron: "50 16 * * *"   # 11:50 Bogotá -> franja 12:00
     - cron: "50 22 * * *"   # 17:50 Bogotá -> franja 18:00
@@ -39,7 +40,7 @@ jobs:
           ESPERAR_FRANJA: ${{ github.event_name == 'schedule' && '1' || '0' }}
           MAX_POR_FRANJA: "5"
           SEPARACION_SEGUNDOS: "60"
-          FRANJAS: "10:00,12:00,18:00"
+          FRANJAS: "07:00,10:00,12:00,18:00"
         run: python3 tools/publicar_instagram.py
 
       - name: Guardar el estado en el repositorio

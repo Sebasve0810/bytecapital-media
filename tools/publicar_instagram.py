@@ -21,7 +21,7 @@ Variables de entorno:
   MODO              publicar (por defecto) | prueba (no publica: valida token, imágenes y muestra el plan)
   MAX_POR_FRANJA    máximo de posts por ejecución (por defecto 5)
   SEPARACION_SEGUNDOS  espera entre un post y el siguiente (por defecto 60)
-  FRANJAS           horas de publicación en Bogotá (por defecto 10:00,12:00,18:00)
+  FRANJAS           horas de publicación en Bogotá (por defecto 07:00,10:00,12:00,18:00)
   ESPERAR_FRANJA    1 = si la ejecución llega antes de una franja (hasta 20 min), espera a la hora exacta
   MAX_INTENTOS      intentos antes de marcar fallida (por defecto 3)
 """
@@ -43,7 +43,7 @@ TOKEN = os.environ.get("IG_ACCESS_TOKEN", "")
 MODO = os.environ.get("MODO", "publicar").strip().lower()
 MAX_POR_FRANJA = int(os.environ.get("MAX_POR_FRANJA", "5"))
 SEPARACION = int(os.environ.get("SEPARACION_SEGUNDOS", "60"))
-FRANJAS = [f.strip() for f in os.environ.get("FRANJAS", "10:00,12:00,18:00").split(",") if f.strip()]
+FRANJAS = [f.strip() for f in os.environ.get("FRANJAS", "07:00,10:00,12:00,18:00").split(",") if f.strip()]
 ESPERAR_FRANJA = os.environ.get("ESPERAR_FRANJA", "0") == "1"
 MAX_INTENTOS = int(os.environ.get("MAX_INTENTOS", "3"))
 POLL_SEGUNDOS = int(os.environ.get("POLL_SEGUNDOS", "10"))
@@ -119,6 +119,15 @@ def guardar_estado(est):
         f.write("\n")
 
 
+def _instante(valor):
+    """ISO 8601 (con Z o con -05:00) -> datetime comparable; vacío/ inválido va al final."""
+    try:
+        d = datetime.fromisoformat(str(valor).replace("Z", "+00:00"))
+        return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+    except Exception:
+        return datetime.max.replace(tzinfo=timezone.utc)
+
+
 def pendientes():
     if not os.path.isdir(DIR_COLA):
         return []
@@ -139,7 +148,10 @@ def pendientes():
         if est and est.get("estado") == "error" and est.get("intentos", 0) >= MAX_INTENTOS:
             continue
         lista.append((post, est or {"id": post["id"], "intentos": 0}))
-    lista.sort(key=lambda pe: (pe[0].get("encoladoEn", ""), pe[0]["id"]))
+    # Orden de publicación: de la noticia más antigua a la más reciente (creadoEn de la noticia);
+    # si no viene, por orden de llegada a la cola.
+    lista.sort(key=lambda pe: (_instante(pe[0].get("creadoEn") or pe[0].get("encoladoEn")),
+                               _instante(pe[0].get("encoladoEn")), pe[0]["id"]))
     return lista
 
 

@@ -9,7 +9,7 @@ Imágenes públicas de los carruseles de Byte Capital (Instagram @byte_capital) 
 - `cola/<id>.json`: posts listos para publicar (los agrega el Publicador de Claude).
 - `estado/<id>.json`: resultado de cada publicación (lo escribe GitHub Actions).
 - `tools/publicar_instagram.py`: publica la cola con la API oficial de Instagram.
-- `.github/workflows/publicar-instagram.yml`: corre a las **10:00, 12:00 y 18:00** (Bogotá) y publica hasta **5 posts** por franja, en orden de llegada, y sube cada uno también a las **historias**.
+- `.github/workflows/publicar-instagram.yml`: corre a las **07:00, 10:00, 12:00 y 18:00** (Bogotá) y publica hasta **5 posts** por franja, de la noticia **más antigua a la más reciente** (campo `creadoEn`), y sube cada uno también a las **historias**.
 
 ## Formato de la cola
 
@@ -24,6 +24,7 @@ Imágenes públicas de los carruseles de Byte Capital (Instagram @byte_capital) 
     "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-03-nvidia-resultados/01.jpg"
   ],
   "historia": "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-03-nvidia-resultados/historia.jpg",
+  "creadoEn": "2026-11-02T14:30:00Z",
   "encoladoEn": "2026-11-03T08:45:00-05:00"
 }
 ```
