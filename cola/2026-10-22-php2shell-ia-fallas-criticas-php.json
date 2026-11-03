@@ -1,0 +1,13 @@
+{
+  "id": "2026-10-22-php2shell-ia-fallas-criticas-php",
+  "titulo": "IA ayuda a hallar PHP2Shell: dos fallas críticas en PHP, usado por ~70% de la web",
+  "texto": "Dos fallas críticas en PHP, llamadas PHP2Shell, se encontraron con ayuda de IA y ya tienen parche. 🚨\n\nWiz estima que PHP corre cerca de 70% de los sitios web, y circula código de exploit sin verificar: conviene actualizar ya.\n\n¿Crees que la IA hará más fácil atacar o defender? Cuéntanos 👇\n\nGuarda este post y síguenos para más de IA, tech y mercados.\n\n#inteligenciaartificial #ciberseguridad #tecnologia #php #openai #ia #noticiastech #bytecapital",
+  "imagenes": [
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-10-22-php2shell-ia-fallas-criticas-php/01.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-10-22-php2shell-ia-fallas-criticas-php/02.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-10-22-php2shell-ia-fallas-criticas-php/03.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-10-22-php2shell-ia-fallas-criticas-php/04.jpg"
+  ],
+  "historia": "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-10-22-php2shell-ia-fallas-criticas-php/historia.jpg",
+  "encoladoEn": "2026-11-03T20:09:04-05:00"
+}
