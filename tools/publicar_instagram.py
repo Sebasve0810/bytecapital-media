@@ -4,6 +4,8 @@ Lo corre el workflow .github/workflows/publicar-instagram.yml en las franjas del
 
 Cola (la escribe el Publicador de Claude, este script nunca la modifica):
   cola/<id>.json  {"id", "titulo", "texto", "imagenes": [urls raw de GitHub], "historia": url 1080x1920, "encoladoEn"}
+  Reel: {"tipo": "reel", "video": url mp4 (H.264, AAC 48 kHz, 9:16), "portada": url jpg, ...}; la historia usa la portada.
+  "noAntesDe" (opcional, ISO): el post no se publica antes de esa hora.
   Cada post publicado sube también una historia con `historia` (si falta, con la primera imagen).
 Estado (lo escribe este script):
   estado/<id>.json  {"id", "estado", "intentos", "publicadaEn", "mediaId", "permalink", "ultimoError",
@@ -147,6 +149,9 @@ def pendientes():
             continue
         if est and est.get("estado") == "error" and est.get("intentos", 0) >= MAX_INTENTOS:
             continue
+        # "noAntesDe" (opcional): no se publica antes de esa hora (20 min de margen por el arranque anticipado).
+        if post.get("noAntesDe") and _instante(post["noAntesDe"]) > ahora() + timedelta(minutes=20):
+            continue
         lista.append((post, est or {"id": post["id"], "intentos": 0}))
     # Orden de publicación: de la noticia más antigua a la más reciente (creadoEn de la noticia);
     # si no viene, por orden de llegada a la cola.
@@ -181,7 +186,13 @@ def historias_pendientes():
     return lista
 
 
+def es_reel(post):
+    return str(post.get("tipo", "")).lower() == "reel"
+
+
 def url_historia(post):
+    if es_reel(post):
+        return post.get("historia") or post.get("portada")
     return post.get("historia") or post["imagenes"][0]
 
 
@@ -199,7 +210,11 @@ def url_responde(url):
 def validar(post):
     imgs = post.get("imagenes") or []
     texto = post.get("texto") or ""
-    if not 1 <= len(imgs) <= 20:
+    if es_reel(post):
+        if not post.get("video") or not post.get("portada"):
+            return "un reel necesita 'video' y 'portada'"
+        imgs = [post["video"], post["portada"]]
+    elif not 1 <= len(imgs) <= 20:
         return f"debe tener entre 1 y 20 imágenes (tiene {len(imgs)})"
     if len(texto) > 2200:
         return f"el texto supera 2.200 caracteres ({len(texto)})"
@@ -212,8 +227,8 @@ def validar(post):
     return None
 
 
-def esperar_contenedor(cid):
-    limite = time.time() + POLL_MAX_SEGUNDOS
+def esperar_contenedor(cid, max_segundos=None):
+    limite = time.time() + (max_segundos or POLL_MAX_SEGUNDOS)
     while True:
         st = llamar("GET", cid, params={"fields": "status_code"}).get("status_code")
         if st == "FINISHED":
@@ -226,14 +241,21 @@ def esperar_contenedor(cid):
 
 
 def publicar(uid, post):
-    imgs, texto = post["imagenes"], post.get("texto", "")
-    if len(imgs) == 1:
+    texto = post.get("texto", "")
+    imgs = post.get("imagenes") or []
+    if es_reel(post):
+        cid = llamar("POST", f"{uid}/media",
+                     {"media_type": "REELS", "video_url": post["video"], "cover_url": post["portada"],
+                      "caption": texto, "share_to_feed": True})["id"]
+        esperar_contenedor(cid, max_segundos=900)  # el video tarda más en procesarse
+    elif len(imgs) == 1:
         cid = llamar("POST", f"{uid}/media", {"image_url": imgs[0], "caption": texto})["id"]
     else:
         hijos = [llamar("POST", f"{uid}/media", {"image_url": u, "is_carousel_item": True})["id"] for u in imgs]
         cid = llamar("POST", f"{uid}/media",
                      {"media_type": "CAROUSEL", "children": ",".join(hijos), "caption": texto})["id"]
-    esperar_contenedor(cid)
+    if not es_reel(post):
+        esperar_contenedor(cid)
     try:
         media_id = llamar("POST", f"{uid}/media_publish", {"creation_id": cid}, reintentos=0)["id"]
     except ErrorRed as e:
@@ -326,7 +348,8 @@ def main():
     if MODO == "prueba":
         for post, _ in tanda:
             problema = validar(post) or url_responde(url_historia(post))
-            log(f"{'✅' if not problema else '❌'} {post['id']}: {len(post.get('imagenes', []))} imagen(es)"
+            log(f"{'✅' if not problema else '❌'} {post['id']}: "
+                + ("reel" if es_reel(post) else f"{len(post.get('imagenes', []))} imagen(es)")
                 + (" + historia" if post.get("historia") else " + historia con la portada")
                 + (f" · {problema}" if problema else ""))
         return 0

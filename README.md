@@ -29,6 +29,8 @@ Imágenes públicas de los carruseles de Byte Capital (Instagram @byte_capital) 
 }
 ```
 
+**Reels** (opcional): `cola/<id>.json` con `"tipo": "reel"`, `"video"` (MP4 H.264, audio AAC a 48 kHz, 9:16) y `"portada"` (JPG); la historia usa la portada. Cualquier post puede llevar `"noAntesDe"` (fecha ISO) para que no salga antes de esa hora. Los reels van en `reels/`.
+
 `estado/<id>.json` queda con `estado` = `publicada` (con `permalink`), `error` (se reintenta en la siguiente franja, hasta 3 intentos) o `fallida` (no se reintenta; revisar `ultimoError`). El campo `historia` guarda el resultado de la historia: si falla, se reintenta en las franjas siguientes (hasta 3 veces en 24 horas) sin afectar al post. Si la cola no trae `historia`, se usa la primera imagen. La API no permite stickers ni enlaces en las historias.
 
 ## Configuración (una sola vez)
