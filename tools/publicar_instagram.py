@@ -311,6 +311,32 @@ def esperar_hasta_franja():
             return
 
 
+def llego_tarde_y_ya_hubo_franja():
+    """GitHub a veces corre los horarios programados horas tarde. La ejecución principal la lanza
+    el Publicador de Claude a la hora exacta; la programada de GitHub queda de respaldo y no publica
+    si llega más de 30 minutos tarde y ya se publicó algo en las últimas 2 horas y media."""
+    t = ahora()
+    pasadas = []
+    for f in FRANJAS:
+        h, m = map(int, f.split(":"))
+        franja = t.replace(hour=h, minute=m, second=0, microsecond=0)
+        if franja <= t:
+            pasadas.append(franja)
+    if not pasadas or (t - max(pasadas)).total_seconds() <= 30 * 60:
+        return False
+    limite = t - timedelta(minutes=150)
+    if os.path.isdir(DIR_ESTADO):
+        for nombre in os.listdir(DIR_ESTADO):
+            if not nombre.endswith(".json"):
+                continue
+            try:
+                if datetime.fromisoformat(leer_json(os.path.join(DIR_ESTADO, nombre)).get("publicadaEn", "")) >= limite:
+                    return True
+            except (ValueError, TypeError, OSError, json.JSONDecodeError):
+                continue
+    return False
+
+
 def escribir_resumen():
     ruta = os.environ.get("GITHUB_STEP_SUMMARY")
     if ruta:
@@ -356,6 +382,10 @@ def main():
 
     if ESPERAR_FRANJA:
         esperar_hasta_franja()
+
+    if os.environ.get("EVENTO") == "schedule" and llego_tarde_y_ya_hubo_franja():
+        log("El horario automático de GitHub llegó tarde y esta franja ya se publicó; no se publica nada")
+        return 0
 
     fallos = 0
     for post, est in reintentos_historia:

@@ -1,6 +1,9 @@
 name: Publicar en Instagram
 
 # Franjas (hora de Bogotá, UTC-5): 07:00, 10:00, 12:00 y 18:00.
+# La ejecución principal la lanza el Publicador de Claude a las 6:55, 9:55, 11:55 y 17:55
+# (workflow_dispatch), porque GitHub suele correr los horarios programados horas tarde o saltárselos.
+# Los horarios de abajo quedan de respaldo: si llegan tarde y la franja ya se publicó, no hacen nada.
 # El cron arranca 10 minutos antes (en UTC) y el script espera a la hora exacta,
 # porque GitHub suele retrasar unos minutos las ejecuciones programadas.
 on:
@@ -30,6 +33,8 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main   # siempre la cola y el estado más recientes, aunque la ejecución arranque tarde
 
       - name: Publicar la cola (máximo 5 posts)
         env:
@@ -37,7 +42,8 @@ jobs:
           IG_USER_ID: ${{ secrets.IG_USER_ID || '17841424069892350' }}
           IG_API_BASE: https://graph.facebook.com/v26.0
           MODO: ${{ inputs.modo || 'publicar' }}
-          ESPERAR_FRANJA: ${{ github.event_name == 'schedule' && '1' || '0' }}
+          ESPERAR_FRANJA: "1"
+          EVENTO: ${{ github.event_name }}
           MAX_POR_FRANJA: "5"
           SEPARACION_SEGUNDOS: "60"
           FRANJAS: "07:00,10:00,12:00,18:00"
