@@ -1,0 +1,14 @@
+{
+  "id": "2026-11-24-anthropic-vp-vnp-claude",
+  "titulo": "Claude dice haber probado VP ≠ VNP; nadie la ha revisado",
+  "texto": "Anthropic publicó un paper de 70 páginas escrito por Claude que afirma probar VP ≠ VNP, la versión algebraica de P vs NP. 🧮\n\nLo que falta: ningún matemático la ha revisado y la verificación en Lean no confirma que el enunciado sea el correcto. Tampoco resuelve P vs NP.\n\n¿Confiarías en una prueba sin revisión humana? Cuéntanos 👇\n\nGuarda este post y síguenos para más de IA, tech y mercados.\n\n#inteligenciaartificial #anthropic #claude #matematicas #ia #tecnologia #noticiastech #bytecapital",
+  "imagenes": [
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-24-anthropic-vp-vnp-claude/01.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-24-anthropic-vp-vnp-claude/02.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-24-anthropic-vp-vnp-claude/03.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-24-anthropic-vp-vnp-claude/04.jpg"
+  ],
+  "historia": "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-24-anthropic-vp-vnp-claude/historia.jpg",
+  "creadoEn": "2026-11-24T17:30:00Z",
+  "encoladoEn": "2026-11-25T10:41:00-05:00"
+}

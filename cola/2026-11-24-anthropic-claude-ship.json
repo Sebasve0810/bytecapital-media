@@ -1,0 +1,14 @@
+{
+  "id": "2026-11-24-anthropic-claude-ship",
+  "titulo": "Anthropic lanza Claude Ship: agentes que revisan, arreglan y aprueban código",
+  "texto": "Anthropic lanzó Claude Ship: tres agentes que revisan, corrigen y aprueban pull requests en GitHub desde Claude Code con /ship. Está en beta para Team y Enterprise, cobra por uso y la propia empresa avisa que puede fallar. ¿Dejarías que una IA apruebe tu código? Guarda este post y síguenos para más de IA, tech y mercados.\n\n#bytecapital #anthropic #claude #inteligenciaartificial #ia #programacion #tecnologia #desarrolladores",
+  "imagenes": [
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-24-anthropic-claude-ship/01.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-24-anthropic-claude-ship/02.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-24-anthropic-claude-ship/03.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-24-anthropic-claude-ship/04.jpg"
+  ],
+  "historia": "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-24-anthropic-claude-ship/historia.jpg",
+  "creadoEn": "2026-11-24T21:25:00Z",
+  "encoladoEn": "2026-11-25T10:41:05-05:00"
+}
