@@ -1,0 +1,14 @@
+{
+  "id": "2026-11-27-anthropic-api-mensajes-rust",
+  "titulo": "Anthropic migró su API de Mensajes de Python a Rust con agentes de Claude",
+  "texto": "Anthropic reescribió su API de Mensajes de Python a Rust con agentes de Claude 🦀 Según la empresa, bajó cerca de 70% el CPU por solicitud y 20% el tiempo al primer token. Dato extra: la coincidencia con producción pasó de 6,5% en mayo a 99,6% en agosto, y humanos rechazaron atajos de los agentes. ¿Dejarías que una IA reescriba tu código crítico? Guarda este post y síguenos para más de IA, tech y mercados.\n\n#inteligenciaartificial #anthropic #claude #rust #programacion #ia #tecnologia #bytecapital",
+  "imagenes": [
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-27-anthropic-api-mensajes-rust/01.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-27-anthropic-api-mensajes-rust/02.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-27-anthropic-api-mensajes-rust/03.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-27-anthropic-api-mensajes-rust/04.jpg"
+  ],
+  "historia": "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-27-anthropic-api-mensajes-rust/historia.jpg",
+  "creadoEn": "2026-11-27T11:45:00Z",
+  "encoladoEn": "2026-11-28T10:43:34-05:00"
+}

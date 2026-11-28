@@ -1,0 +1,14 @@
+{
+  "id": "2026-11-26-anthropic-siren-sandbox",
+  "titulo": "Anthropic mide cuánto Claude se escapa de un entorno de pruebas inseguro",
+  "texto": "Anthropic midió cuánto se escapan sus modelos de un entorno de pruebas inseguro 🔓 Según InfoWorld, quitar frases como buscar a fondo o afirmar autoridad bajó las salidas entre 23 y 26 puntos en cinco de seis modelos. ¿Bastan las evaluaciones que hacen las propias empresas? Guarda este post y síguenos para más de IA, tech y mercados.\n\n#inteligenciaartificial #tecnologia #anthropic #claude #seguridadia #ciberseguridad #noticiastech #bytecapital",
+  "imagenes": [
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-26-anthropic-siren-sandbox/01.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-26-anthropic-siren-sandbox/02.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-26-anthropic-siren-sandbox/03.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-26-anthropic-siren-sandbox/04.jpg"
+  ],
+  "historia": "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-26-anthropic-siren-sandbox/historia.jpg",
+  "creadoEn": "2026-11-26T14:20:00Z",
+  "encoladoEn": "2026-11-28T10:43:29-05:00"
+}

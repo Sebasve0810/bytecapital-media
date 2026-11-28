@@ -1,0 +1,13 @@
+{
+  "id": "2026-11-27-microsoft-artex-ia-ataques",
+  "titulo": "Microsoft alerta: ARTEX acelera ataques con IA",
+  "texto": "🛡️ Microsoft alerta que el framework ARTEX automatiza ataques con IA: hasta 2.900 intentos de login fallidos por minuto y acceso privilegiado en menos de 3 horas. Lo clave: no usa técnicas nuevas, por eso la defensa pasa por MFA resistente al phishing y detección por comportamiento. ¿Tu empresa ya usa MFA resistente al phishing? Guarda este post y síguenos para más de IA, tech y mercados.\n\n#microsoft #ciberseguridad #inteligenciaartificial #ia #tecnologia #hacking #azure #noticiastech #bytecapital",
+  "imagenes": [
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-27-microsoft-artex-ia-ataques/01.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-27-microsoft-artex-ia-ataques/02.jpg",
+    "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-27-microsoft-artex-ia-ataques/03.jpg"
+  ],
+  "historia": "https://raw.githubusercontent.com/Sebasve0810/bytecapital-media/main/posts/2026-11-27-microsoft-artex-ia-ataques/historia.jpg",
+  "creadoEn": "2026-11-27T17:25:00Z",
+  "encoladoEn": "2026-11-28T10:43:36-05:00"
+}
